@@ -8,13 +8,14 @@ import Dashboard from './components/Dashboard/Dashboard';
 import { authService } from './services/auth.service';
 
 const AppContent: React.FC = () => {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, updateUser } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
 
   const handleOnboardingComplete = async () => {
     if (user) {
       try {
         await authService.updateOnboardingStatus(user.id, true);
+        updateUser({ onboardingCompleted: true });
       } catch (error) {
         console.error('Error updating onboarding status:', error);
       }

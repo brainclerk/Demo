@@ -42,7 +42,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             />
             <label
               htmlFor={`${name}-${option.value}`}
-              className="radio-label"
+              className="radio-label ml-3"
             >
               {option.label}
             </label>

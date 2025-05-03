@@ -169,7 +169,7 @@ const BasicInfoSection: React.FC = () => {
                 {...register('sex', { required: 'Please select your pet\'s sex' })}
                 value={option.value}
               />
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <option.icon 
                   className={classNames(
                     "w-5 h-5 transition-all duration-200",

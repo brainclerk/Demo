@@ -27,7 +27,7 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
           type="button"
           onClick={onPrevious}
           disabled={isSubmitting}
-          className="btn-secondary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-secondary flex items-center space-x-2 px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Previous</span>
@@ -36,28 +36,26 @@ const FormNavigation: React.FC<FormNavigationProps> = ({
         <div></div>
       )}
       
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={isSubmitting}
-        className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Saving...</span>
-          </>
-        ) : isLastSection ? (
-          <>
-            <span>Submit</span>
-          </>
-        ) : (
-          <>
-            <span>Next</span>
-            <ArrowRight className="w-4 h-4" />
-          </>
-        )}
-      </button>
+      {!isLastSection && (
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isSubmitting}
+          className="btn-primary flex items-center space-x-2 px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <span>Next</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 };

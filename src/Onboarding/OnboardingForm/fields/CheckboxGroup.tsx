@@ -42,7 +42,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
             />
             <label
               htmlFor={`${name}-${option.value}`}
-              className="checkbox-label"
+              className="checkbox-label ml-2"
             >
               {option.label}
             </label>

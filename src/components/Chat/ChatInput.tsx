@@ -5,9 +5,10 @@ interface ChatInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSend: (message: string) => void;
+  onRefresh: () => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, onRefresh }) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -22,7 +23,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend }) => {
           <button className="text-gray-400 hover:text-gray-600 transition-colors">
             <Upload className="w-5 h-5" />
           </button>
-          <button className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button 
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={onRefresh}
+          >
             <RefreshCw className="w-5 h-5" />
           </button>
         </div>

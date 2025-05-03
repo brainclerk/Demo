@@ -171,6 +171,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
     }
   };
 
+  const handleRefresh = () => {
+    setMessagesByAgent(prev => ({
+      ...prev,
+      [currentAgent]: []
+    }));
+  };
+
   return (
     <div className="flex flex-col h-full max-w-5xl mx-auto">
       <ChatHeader pet={pet} />
@@ -179,6 +186,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onSend={handleSendMessage}
+        onRefresh={handleRefresh}
       />
       
       <div className="h-4"></div>

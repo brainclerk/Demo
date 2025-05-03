@@ -231,11 +231,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
         </motion.div>
       ))}
       
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-2">
         <button
           type="button"
           onClick={onSubmit}
-          className="btn-primary px-8 py-4 flex items-center space-x-2"
+          className="w-full bg-blue-400 hover:bg-blue-500 text-white font-medium px-8 py-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
         >
           <span>Submit Pet Health Profile</span>
         </button>

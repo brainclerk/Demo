@@ -50,9 +50,14 @@ const NutritionShop: React.FC<NutritionShopProps> = ({ order }) => {
       
       <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
         <div className="text-sm text-gray-600">${order.products[0].price.toFixed(2)} + $5.99 shipping</div>
-        <button className="bg-blue-500 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors">
+        <a 
+          href="https://plutopets.co/a/loop_subscriptions/customer/6859694571700/subscription/13941113012?merchantToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVHlwZSI6IkNVU1RPTUVSIiwidXNlcklkIjo2NjQwNTg3NCwidXNlclNob3BpZnlJZCI6Njg1OTY5NDU3MTcwMCwic3RvcmVJZCI6OTY0MiwibXlzaG9waWZ5RG9tYWluIjoiYWZkZDgzLTMubXlzaG9waWZ5LmNvbSIsImNvbnRleHQiOiJNRVJDSEFOVCIsImlhdCI6MTc0NjIyOTQ5OSwiZXhwIjoxNzQ2NTc1MDk5fQ.O5QYCqQwsMf2btKVBl1aRrUKcWEak0mb4Mhaygc-QuA"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-blue-500 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+        >
           View details
-        </button>
+        </a>
       </div>
     </div>
   );
