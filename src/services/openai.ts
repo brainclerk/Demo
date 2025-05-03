@@ -22,12 +22,33 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
 
     while (retryCount < maxRetries) {
         try {
-            const completion = await openai.chat.completions.create({
-                model: "gpt-4.1",
-                messages: options.messages.map(msg => ({
+            const messages = options.messages.map(msg => {
+                if (msg.images && msg.images.length > 0) {
+                    return {
+                        role: msg.role,
+                        content: [
+                            {
+                                type: 'text',
+                                text: msg.content
+                            },
+                            ...msg.images.map(image => ({
+                                type: 'image_url',
+                                image_url: {
+                                    url: `data:image/jpeg;base64,${image}`
+                                }
+                            }))
+                        ]
+                    } as const;
+                }
+                return {
                     role: msg.role,
                     content: msg.content
-                })),
+                } as const;
+            });
+
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4.1",
+                messages: messages as any, // Type assertion needed due to OpenAI's type definitions
                 temperature: options.temperature || 0.42,
                 max_tokens: options.max_tokens || 1000
             });

@@ -100,8 +100,53 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
     }
   };
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
+  const handleSendMessage = async (message: string, files?: File[]) => {
+    if (!message.trim() && (!files || files.length === 0)) return;
+    
+    let imageBase64s: string[] = [];
+    if (files && files.length > 0) {
+      try {
+        // Filter for image files
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        
+        // Process up to 5 images
+        const imagesToProcess = imageFiles.slice(0, 5);
+        
+        // Process each image
+        imageBase64s = await Promise.all(
+          imagesToProcess.map(async (file) => {
+            // Create a canvas to resize the image
+            const img = await createImageBitmap(file);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Calculate new dimensions (max 400px width/height)
+            const maxSize = 400;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height && width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            } else if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress the image
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Convert to base64 with reduced quality
+            return canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+          })
+        );
+      } catch (error) {
+        console.error('Error processing images:', error);
+      }
+    }
     
     // Create and add user message
     const userMessage: Message = {
@@ -109,7 +154,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       content: message,
       role: 'user',
       timestamp: new Date(),
-      agentType: currentAgent
+      agentType: currentAgent,
+      images: imageBase64s,
+      hasMoreFiles: files ? files.length > 5 : false
     };
     
     setMessagesByAgent(prev => ({
@@ -164,7 +211,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       };
       setMessagesByAgent(prev => ({
         ...prev,
-        [currentAgent]: [...prev[currentAgent], errorMessage]
+        [currentAgent]: [errorMessage]
       }));
     } finally {
       setIsLoading(false);

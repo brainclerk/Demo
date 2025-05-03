@@ -48,6 +48,8 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   timestamp: Date;
   agentType?: AgentType;
+  images?: string[];
+  hasMoreFiles?: boolean;
 }
 
 export interface VetHistoryItem {
