@@ -5,6 +5,9 @@ export interface User {
   premium: boolean;
   avatar: string;
   credits: string;
+  onboardingCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Pet {

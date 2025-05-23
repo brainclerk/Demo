@@ -9,11 +9,19 @@ const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   return (
     <div className="p-6">
       <div className="flex items-center">
-        <img 
-          src={user.avatar} 
-          alt={user.name} 
-          className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
-        />
+        {
+          user.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.name}
+              className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-green-200 flex items-center justify-center">
+              <p className="text-green-500 text-2xl font-bold">{user.name.toUpperCase().charAt(0) || user.email.toUpperCase().charAt(0)}</p>
+            </div>
+          )
+        }
         <div className="ml-4">
           <div className="flex items-center mb-1">
             <span className="inline-block bg-blue-500 text-white text-xs font-medium px-2 py-0.5 rounded-md mr-2">

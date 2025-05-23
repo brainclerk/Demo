@@ -1,13 +1,17 @@
 import React from 'react';
 import NutritionShop from '../Features/NutritionShop';
 import VetHistory from '../Features/VetHistory';
-import { mockNutritionOrder, mockVetHistory } from '../../data/mockData';
+import { mockNutritionOrder } from '../../data/mockData';
 
-const FeatureCards: React.FC = () => {
+interface FeatureCardsProps {
+  onSessionSelect: (sessionId: string) => void;
+}
+
+const FeatureCards: React.FC<FeatureCardsProps> = ({ onSessionSelect }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <NutritionShop order={mockNutritionOrder} />
-      <VetHistory historyItems={mockVetHistory} />
+      <VetHistory onSessionSelect={onSessionSelect} />
     </div>
   );
 };

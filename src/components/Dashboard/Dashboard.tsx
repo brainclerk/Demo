@@ -2,11 +2,12 @@ import React from 'react';
 import Sidebar from '../Sidebar/Sidebar';
 import ChatInterface from '../Chat/ChatInterface';
 import { usePet } from '../../contexts/PetContext';
-import { mockUser } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
+import { User } from '../../types';
 
 const Dashboard: React.FC = () => {
   const { currentPet, isLoading, error } = usePet();
-
+  const { user } = useAuth();
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -32,9 +33,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar user={mockUser} />
-      <main className="flex-1 p-4 md:p-6">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <Sidebar user={user as User} />
+      <main className="flex-1 h-screen overflow-y-auto">
         <ChatInterface pet={currentPet} />
       </main>
     </div>
