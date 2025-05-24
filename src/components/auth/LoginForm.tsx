@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import Input from '../UI/Input';
 import Button from '../UI/Button';
-import SocialLoginButton from './SocialLoginButton';
-import Divider from './Divider';
+// import SocialLoginButton from './SocialLoginButton';
+// import Divider from './Divider';
 import Logo from '../UI/Logo';
 import Badge from '../UI/Badge';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -21,23 +22,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onSwitchToRegiste
   const [resendingEmail, setResendingEmail] = useState(false);
   const [emailResent, setEmailResent] = useState(false);
 
-  const handleGoogleLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
-    }
-  };
+  // const handleGoogleLogin = async (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await signInWithGoogle();
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
+  //   }
+  // };
 
-  const handleFacebookLogin = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    try {
-      await signInWithFacebook();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in with Facebook');
-    }
-  };
+  // const handleFacebookLogin = async (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await signInWithFacebook();
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Failed to sign in with Facebook');
+  //   }
+  // };
 
   const handleResendConfirmation = async () => {
     try {
@@ -90,14 +91,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onSwitchToRegiste
       <div className="mb-4 flex flex-col items-center">
         <Logo />
         <div className="mt-2">
-          <Badge text="BETA" className="bg-purple-500" />
+          <Badge color="purple">BETA</Badge>
         </div>
         <h1 className="mt-8 text-3xl font-bold text-gray-800">Welcome Back!</h1>
         <p className="mt-2 text-gray-600">Let's get you signed in securely.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8">
-        <div className="w-full space-y-3">
+        {/* <div className="w-full space-y-3">
           <SocialLoginButton 
             provider="google" 
             onClick={handleGoogleLogin}
@@ -108,7 +109,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onSwitchToRegiste
           />
         </div>
 
-        <Divider text="Or" />
+        <Divider text="Or" /> */}
 
         {error && (
           <div className="mb-4 rounded-md bg-blue-50 p-4">

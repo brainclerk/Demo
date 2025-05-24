@@ -30,6 +30,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
   const [currentAgent, setCurrentAgent] = useState<AgentType>('general');
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -202,6 +203,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
         return;
       }
       setCurrentSessionId(sessionId);
+      // Trigger history refresh after creating new session
+      setHistoryRefreshTrigger(prev => prev + 1);
 
       const systemMessage: Message = {
         id: Date.now().toString(),
@@ -258,8 +261,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
     }
   };
 
-  const updateChatSessionTitle = async (messages: Message[]) => {
-    if (!currentSessionId || messages.length < 2) return;
+  const updateChatSessionTitle = async (messages: Message[], sessionId: string) => {
+    if (!sessionId || messages.length < 1) return;
 
     try {
       // Create a prompt for OpenAI to generate a title
@@ -283,10 +286,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       const { error } = await supabase
         .from('chat_sessions')
         .update({ title: response.content.trim() })
-        .eq('id', currentSessionId);
+        .eq('id', sessionId);
 
       if (error) {
         console.error('Error updating chat session title:', error);
+      } else {
+        setHistoryRefreshTrigger(prev => prev + 1);
       }
     } catch (error) {
       console.error('Error generating chat title:', error);
@@ -296,14 +301,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
   const handleSendMessage = async (message: string, files?: File[]) => {
     if (!message.trim() && (!files || files.length === 0)) return;
 
-    // Create a chat session if one doesn't exist
-    let sessionId = currentSessionId;
+    // Use selectedSessionId if available, otherwise use currentSessionId
+    let sessionId = selectedSessionId || currentSessionId;
+    
+    // Only create a new session if we don't have any session ID
     if (!sessionId) {
       sessionId = await createChatSession();
       if (!sessionId) {
         return;
       }
       setCurrentSessionId(sessionId);
+      // Trigger history refresh after creating new session
+      setHistoryRefreshTrigger(prev => prev + 1);
     }
 
     let imageBase64s: string[] = [];
@@ -421,7 +430,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       if (sessionId) {
         await saveMessageToDatabase(assistantMessage, sessionId);
         // Update chat session title after getting the response
-        await updateChatSessionTitle([...messagesByAgent[currentAgent], userMessage, assistantMessage]);
+        await updateChatSessionTitle([...messagesByAgent[currentAgent], userMessage, assistantMessage], sessionId);
       }
     } catch (error: any) {
       console.error('Error getting AI response:', error);
@@ -478,6 +487,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
         onChange={(e) => setInputValue(e.target.value)}
         onSend={handleSendMessage}
         onRefresh={handleRefresh}
+        petName={pet.pet_name}
       />
 
       <div className="h-4"></div>
@@ -492,12 +502,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
         {messagesByAgent[currentAgent].length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center h-48">
             <Sparkles className="w-8 h-8 text-gray-300 mb-2" />
-            <p className="text-gray-500">Ask a question about {pet.name}'s health</p>
+            <p className="text-gray-500">Ask a question about {pet.pet_name}'s health</p>
           </div>
         )}
       </div>
 
-      <FeatureCards onSessionSelect={handleSessionSelect} />
+      <FeatureCards onSessionSelect={handleSessionSelect} historyRefreshTrigger={historyRefreshTrigger} />
     </div>
   );
 };

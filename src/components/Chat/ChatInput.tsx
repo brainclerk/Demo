@@ -1,11 +1,70 @@
-import React, { KeyboardEvent, useState, useRef } from 'react';
-import { Upload, RefreshCw, X, File } from 'lucide-react';
+import React, { KeyboardEvent, useState, useRef, useEffect } from 'react';
+import { Upload, RefreshCw, X, File, Mic, MicOff } from 'lucide-react';
+
+// Add type definitions for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+  interpretation: any;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onaudioend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onaudiostart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+  onnomatch: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+  onsoundend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onsoundstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onspeechend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onspeechstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
 
 interface ChatInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSend: (message: string, files?: File[]) => void;
   onRefresh: () => void;
+  petName: string;
 }
 
 interface FileWithPreview {
@@ -16,9 +75,78 @@ interface FileWithPreview {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, onRefresh }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, onRefresh, petName }) => {
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const finalTranscriptRef = useRef('');
+
+  useEffect(() => {
+    // Initialize speech recognition
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.maxAlternatives = 1;
+
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+        const results = event.results;
+        let transcript = '';
+
+        for (let i = 0; i < results.length; i++) {
+          if (results[i].isFinal) {
+            transcript += results[i][0].transcript;
+          }
+        }
+
+        if (transcript) {
+          onChange({ 
+            target: { 
+              value: transcript 
+            } 
+          } as React.ChangeEvent<HTMLInputElement>);
+        }
+      };
+
+      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+        if (isVoiceMode && recognitionRef.current) {
+          recognitionRef.current.start();
+        }
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [onChange, isVoiceMode]);
+
+  const toggleVoiceMode = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in your browser.');
+      return;
+    }
+
+    setIsVoiceMode(!isVoiceMode);
+    if (!isVoiceMode) {
+      finalTranscriptRef.current = '';
+      setIsListening(true);
+      recognitionRef.current.start();
+    } else {
+      setIsListening(false);
+      recognitionRef.current.stop();
+    }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -129,18 +257,26 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, onChange, onSend, onRefres
             value={value}
             onChange={onChange}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me anything related to your dog!"
+            placeholder={`Ask me anything about ${petName}!`}
             className="flex-1 py-2 px-3 text-gray-700 focus:outline-none bg-transparent"
             autoFocus
           />
           
           <div className="flex items-center">
-            <span className="text-xs text-gray-500 mr-2">Use Voice Mode</span>
+            <span className="text-xs text-gray-500 mr-2">Voice Mode</span>
             <button 
-              className="bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-colors"
-              onClick={handleSend}
+              className={`p-2 rounded-lg transition-colors ${
+                isVoiceMode 
+                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}
+              onClick={toggleVoiceMode}
             >
-              <img src="/voice-waves.svg" alt="Voice Mode" className="w-5 h-5" />
+              {isListening ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>

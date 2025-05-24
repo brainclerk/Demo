@@ -3,6 +3,14 @@ import { useFormContext } from 'react-hook-form';
 import { FormData, formSections } from '../types/form';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { 
+  sexLabels, 
+  breedTypeLabels, 
+  sizeCategoryLabels, 
+  activityLevelLabels, 
+  temperamentLabels,
+  getLabel 
+} from '../constants/formLabels';
 
 interface ReviewSectionProps {
   onSubmit: () => void;
@@ -66,11 +74,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Breed Type</p>
-                  <p className="font-medium">{formData.breedType || 'Not specified'}</p>
+                  <p className="font-medium">{getLabel(formData.breedType, breedTypeLabels)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Sex</p>
-                  <p className="font-medium">{formData.sex || 'Not specified'}</p>
+                  <p className="font-medium">{getLabel(formData.sex, sexLabels)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Date of Birth</p>
@@ -82,7 +90,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Size Category</p>
-                  <p className="font-medium">{formData.sizeCategory || 'Not specified'}</p>
+                  <p className="font-medium">{getLabel(formData.sizeCategory, sizeCategoryLabels)}</p>
                 </div>
               </div>
             )}
@@ -115,7 +123,35 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
                 )}
                 <div>
                   <p className="text-sm text-slate-500">Vet Records</p>
-                  <p className="font-medium">{formData.vetRecords ? 'Uploaded' : 'Not uploaded'}</p>
+                  <div className="space-y-1">
+                    {formData.vetRecords instanceof File 
+                      ? <p className="font-medium">{formData.vetRecords.name}</p>
+                      : Array.isArray(formData.vetRecords)
+                        ? formData.vetRecords.map((record, index) => {
+                            // Handle both File objects and our custom record type
+                            const filename = 'filename' in record ? String(record.filename) : record.name;
+                            const url = 'url' in record ? String(record.url) : null;
+                            
+                            return (
+                              <div key={index} className="flex items-center space-x-2">
+                                <p className="font-medium">{filename}</p>
+                                {url && (
+                                  <a 
+                                    href={url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-primary-600 hover:text-primary-700 text-sm"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })
+                        : formData.vetRecords 
+                          ? 'File uploaded' 
+                          : 'Not uploaded'}
+                  </div>
                 </div>
               </div>
             )}
@@ -157,7 +193,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-500">Activity Level</p>
-                  <p className="font-medium">{formData.activityLevel || 'Not specified'}</p>
+                  <p className="font-medium">{getLabel(formData.activityLevel, activityLevelLabels)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Activity Minutes per Day</p>
@@ -190,7 +226,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ onSubmit }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-slate-500">General Temperament</p>
-                  <p className="font-medium">{formData.temperament || 'Not specified'}</p>
+                  <p className="font-medium">{getLabel(formData.temperament, temperamentLabels)}</p>
                 </div>
                 <div className="md:col-span-2">
                   <p className="text-sm text-slate-500">Recent Behaviors</p>

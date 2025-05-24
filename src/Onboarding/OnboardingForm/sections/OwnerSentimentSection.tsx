@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormData } from '../types/form';
-import { InputField } from '../../fields/InputField';
+import { InputField } from '../fields/InputField';
 import { CheckboxGroup } from '../fields/CheckboxGroup';
 import { LikertScale } from '../fields/LikertScale';
 

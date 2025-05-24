@@ -88,10 +88,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onRegisterSuccess, onSwitchToLo
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8">
-        <SocialLoginButton provider="google" onClick={() => console.log('Google signup')} />
+        {/* <SocialLoginButton provider="google" onClick={() => console.log('Google signup')} />
         <SocialLoginButton provider="facebook" onClick={() => console.log('Facebook signup')} />
 
-        <Divider text="Or" />
+        <Divider text="Or" /> */}
 
         {error && (
           <div className="mb-4 rounded-md bg-red-50 p-4">

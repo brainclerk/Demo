@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, SubmitHandler } from 'react-hook-form';
 import { FormData } from './types/form';
 import { FormSection, formSections, initialFormData } from './types/form';
 import FormProgress from './FormProgress';
@@ -14,26 +14,47 @@ import ReviewSection from './sections/ReviewSection';
 import FormNavigation from './FormNavigation';
 import { petService } from '../../services/pet.service';
 import { useAuth } from '../../contexts/AuthContext';
+import { Pet } from '../../types';
+import { usePet } from '../../contexts/PetContext';
+import { useNavigate } from 'react-router-dom';
 
 interface OnboardingFormProps {
   onComplete?: () => void;
+  initialData?: Partial<FormData> | Pet;
+  petId?: string;
 }
 
-const OnboardingForm: React.FC<OnboardingFormProps> = ({ onComplete }) => {
+const OnboardingForm: React.FC<OnboardingFormProps> = ({ onComplete, initialData, petId }) => {
   const { user } = useAuth();
+  const { refreshPets } = usePet();
+  const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState<FormSection>('basicInfo');
   const [completed, setCompleted] = useState<Set<FormSection>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const methods = useForm<FormData>({
-    defaultValues: initialFormData,
+    defaultValues: {
+      ...initialFormData,
+      ...(initialData || {}),
+      vetRecords: 'vet_records' in (initialData || {}) 
+        ? (initialData as Pet).vet_records 
+        : (initialData as Partial<FormData>)?.vetRecords || null
+    },
     mode: 'onChange',
   });
   
-  const { handleSubmit } = methods;
+  const { handleSubmit, watch } = methods;
   
-  const onSubmit = async (data: FormData) => {
+  // Watch all form values
+  const formValues = watch();
+  
+  // Log form values whenever they change
+  // useEffect(() => {
+  //   console.log('Current form values:', formValues);
+  // }, [formValues]);
+  
+  const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     if (!user) {
       setError('User not authenticated');
       return;
@@ -42,12 +63,28 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ onComplete }) => {
     try {
       setIsSubmitting(true);
       setError(null);
+      console.log(petId);
+      console.log('Submitting form data:', data);
       
-      // Save pet profile to Supabase
-      await petService.createPetProfile(user.id, data);
+      let result;
+      if (petId) {
+        // Update existing pet profile
+        result = await petService.updatePetProfile(user.id, petId, data);
+      } else {
+        // Create new pet profile
+        result = await petService.createPetProfile(user.id, data);
+      }
+
+      console.log('Result:', result);
       
-      // Call onComplete callback
-      if (onComplete) {
+      // Navigate back to dashboard
+      navigate('/dashboard');
+      
+      // Refresh pet data in the context after navigation
+      await refreshPets();
+      
+      // Only call onComplete after the Supabase actions are complete
+      if (onComplete && result !== undefined) {
         onComplete();
       }
     } catch (err) {

@@ -11,7 +11,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ pet }) => {
     <div className="mb-6 flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-2xl font-semibold flex items-center justify-center">
-          How can I help {pet.name}?
+          How can I help {pet.pet_name}?
           <Sparkles className="w-5 h-5 text-purple-500 ml-2" />
         </h1>
       </div>

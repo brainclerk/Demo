@@ -1,10 +1,11 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormData } from '../types/form';
-import { InputField } from '../../fields/InputField';
+import { InputField } from '../fields/InputField';
 import { RadioGroup } from '../fields/RadioGroup';
 import { ToggleField } from '../fields/ToggleField';
 import { SliderField } from '../fields/SliderField';
+import { activityLevelLabels } from '../constants/formLabels';
 
 const LifestyleSection: React.FC = () => {
   const { 
@@ -17,17 +18,18 @@ const LifestyleSection: React.FC = () => {
   const usesTrackingDevice = watch('usesTrackingDevice');
   const aloneInDay = watch('aloneInDay');
   
+  const activityLevelOptions = Object.entries(activityLevelLabels).map(([value, label]) => ({
+    value,
+    label
+  }));
+  
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <RadioGroup
           label="Daily Activity Level"
           name="activityLevel"
-          options={[
-            { value: 'low', label: 'Low (mostly indoors, short walks)' },
-            { value: 'moderate', label: 'Moderate (regular walks, some play)' },
-            { value: 'high', label: 'High (runs, hikes, very active)' }
-          ]}
+          options={activityLevelOptions}
           register={register}
           rules={{ required: 'Please select an activity level' }}
           error={errors.activityLevel}

@@ -14,7 +14,7 @@ export interface FormData {
     currentMedications: string;
     surgeriesOrProcedures: string;
     surgeryDate: Date | null;
-    vetRecords: File | null;
+    vetRecords: string | null;
 
     // Diet
     dietTypes: string[];

@@ -15,11 +15,16 @@ const PinnedFeatures: React.FC = () => {
         {mockPinnedFeatures.map((feature) => (
           <a 
             key={feature.id}
-            href={feature.path} 
-            className="flex items-center p-2 hover:bg-gray-50 rounded-md transition-colors"
+            // href={feature.path} 
+            className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-md transition-colors"
           >
-            <ClipboardList className="w-5 h-5 text-gray-400 mr-3" />
-            <span className="text-gray-600">{feature.title}</span>
+            <div className="flex items-center">
+              <ClipboardList className="w-5 h-5 text-gray-400 mr-3" />
+              <span className="text-gray-600">{feature.title}</span>
+            </div>
+            <button className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-medium">
+              Coming Soon
+            </button>
           </a>
         ))}
       </div>

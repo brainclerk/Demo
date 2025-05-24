@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FormData } from '../../../types/form';
+import { FormData } from '../types/form';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { InputField } from '../../fields/InputField';
+import { InputField } from '../fields/InputField';
 import { RadioGroup } from '../fields/RadioGroup';
 import { Dog, User, User2, Calendar } from 'lucide-react';
 import classNames from 'classnames';
@@ -26,6 +26,29 @@ const BasicInfoSection: React.FC = () => {
   const { register, formState: { errors }, watch, setValue } = useFormContext<FormData>();
   const [breedSuggestions, setBreedSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const formValues = watch();
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  useEffect(() => {
+    if (!isInitialized && formValues) {
+      // Set all form values if they exist
+      Object.entries(formValues).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          setValue(key as keyof FormData, value);
+        }
+      });
+
+      // Special handling for breed suggestions
+      if (formValues.breed) {
+        const filtered = dogBreeds.filter(breed =>
+          breed.toLowerCase().includes(formValues.breed.toLowerCase())
+        );
+        setBreedSuggestions(filtered);
+      }
+      
+      setIsInitialized(true);
+    }
+  }, [formValues, setValue, isInitialized]);
   
   const selectedSize = watch('sizeCategory');
   const selectedSex = watch('sex');

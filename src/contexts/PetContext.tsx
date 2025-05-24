@@ -42,45 +42,26 @@ export const PetProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         throw fetchError;
       }
 
-      // Transform the data to match our Pet type
-      const transformedPets: Pet[] = data.map(pet => ({
-        id: pet.id,
-        name: pet.pet_name,
-        species: 'Dog', // You might want to add this to your pet_profiles table
-        breed: pet.breed,
-        age: pet.birth_date ? calculateAge(pet.birth_date) : 0,
-        weight: parseFloat(pet.weight) || 0,
-        avatar: '', // You might want to add this to your pet_profiles table
-        healthInfo: {
-          allergies: pet.food_allergies ? pet.food_allergies.split(',').map((a: string) => a.trim()) : [],
-          medications: pet.current_medications ? pet.current_medications.split(',').map((m: string) => m.trim()) : [],
-          conditions: pet.medical_conditions || [],
-          vaccinations: {
-            lastUpdated: new Date(),
-            nextDue: new Date(),
-            records: []
-          },
-          diet: {
-            current: pet.main_brands || '',
-            feedingSchedule: '',
-            treats: [],
-            restrictions: pet.food_allergies ? pet.food_allergies.split(',').map((a: string) => a.trim()) : []
-          },
-          exercise: {
-            dailyRoutine: `${pet.activity_minutes || 0} minutes ${pet.activity_level || 'moderate'} activity`,
-            activities: [],
-            restrictions: ''
-          },
-          lastCheckup: new Date(),
-          nextAppointment: new Date()
-        }
-      }));
-
-      setPets(transformedPets);
+      // The data from Supabase already matches our Pet interface
+      setPets(data as Pet[]);
       
-      // Set the first pet as current if none is selected
-      if (!currentPet && transformedPets.length > 0) {
-        setCurrentPet(transformedPets[0]);
+      // Only set current pet if we don't have one or if the current pet no longer exists
+      if (!currentPet) {
+        if (data.length > 0) {
+          setCurrentPet(data[0] as Pet);
+        }
+      } else {
+        // Check if current pet still exists in the new data
+        const currentPetExists = data.some(pet => pet.id === currentPet.id);
+        if (!currentPetExists && data.length > 0) {
+          setCurrentPet(data[0] as Pet);
+        } else if (currentPetExists) {
+          // Update current pet with latest data
+          const updatedPet = data.find(pet => pet.id === currentPet.id);
+          if (updatedPet) {
+            setCurrentPet(updatedPet as Pet);
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching pets:', err);
@@ -91,22 +72,46 @@ export const PetProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Helper function to calculate age from birth date
-  const calculateAge = (birthDate: string): number => {
-    const birth = new Date(birthDate);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
+  // const calculateAge = (birthDate: string): number => {
+  //   const birth = new Date(birthDate);
+  //   const today = new Date();
+  //   let age = today.getFullYear() - birth.getFullYear();
+  //   const monthDiff = today.getMonth() - birth.getMonth();
     
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
+  //   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+  //     age--;
+  //   }
     
-    return age;
-  };
+  //   return age;
+  // };
 
   useEffect(() => {
     fetchPets();
-  }, [user]); // Re-fetch when user changes
+
+    // Set up real-time subscription
+    if (user) {
+      const subscription = supabase
+        .channel('pet_profiles_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'pet_profiles',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Real-time update received:', payload);
+            fetchPets(); // Refresh data when changes occur
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [user]);
 
   const refreshPets = async () => {
     await fetchPets();

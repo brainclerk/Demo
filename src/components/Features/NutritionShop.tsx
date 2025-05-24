@@ -8,13 +8,20 @@ interface NutritionShopProps {
 }
 
 const NutritionShop: React.FC<NutritionShopProps> = ({ order }) => {
+  const productUrl = "https://plutopets.co/products/superfood-softchew";
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-[420px] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
         <h3 className="text-xl font-semibold">Shop Nutrition</h3>
-        <button className="text-sm bg-white rounded-md px-3 py-1.5 text-gray-700 hover:bg-gray-50 border border-gray-100">
+        <a 
+          href={productUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm bg-white rounded-md px-3 py-1.5 text-gray-700 hover:bg-gray-50 border border-gray-100"
+        >
           View all
-        </button>
+        </a>
       </div>
       
       <div className="p-4 space-y-3">
@@ -31,7 +38,12 @@ const NutritionShop: React.FC<NutritionShopProps> = ({ order }) => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center px-4 py-6 border-t border-gray-100">
+      <a 
+        href={productUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-1 flex items-center px-4 py-6 border-t border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+      >
         <div className="flex items-center gap-6">
           <div className="w-28 h-28 rounded-lg overflow-hidden bg-gray-50 border border-gray-200 p-2">
             <img 
@@ -46,18 +58,16 @@ const NutritionShop: React.FC<NutritionShopProps> = ({ order }) => {
             <div className="font-medium text-gray-900 mt-0.5">${order.products[0].price.toFixed(2)} ×1</div>
           </div>
         </div>
-      </div>
+      </a>
       
       <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
         <div className="text-sm text-gray-600">${order.products[0].price.toFixed(2)} + $5.99 shipping</div>
-        <a 
-          href="https://plutopets.co/a/loop_subscriptions/customer/6859694571700/subscription/13941113012?merchantToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVHlwZSI6IkNVU1RPTUVSIiwidXNlcklkIjo2NjQwNTg3NCwidXNlclNob3BpZnlJZCI6Njg1OTY5NDU3MTcwMCwic3RvcmVJZCI6OTY0MiwibXlzaG9waWZ5RG9tYWluIjoiYWZkZDgzLTMubXlzaG9waWZ5LmNvbSIsImNvbnRleHQiOiJNRVJDSEFOVCIsImlhdCI6MTc0NjIyOTQ5OSwiZXhwIjoxNzQ2NTc1MDk5fQ.O5QYCqQwsMf2btKVBl1aRrUKcWEak0mb4Mhaygc-QuA"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-500 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors"
+        <button 
+          disabled
+          className="bg-gray-300 text-gray-500 px-4 py-1.5 rounded-md text-sm font-medium cursor-not-allowed"
         >
           View details
-        </a>
+        </button>
       </div>
     </div>
   );

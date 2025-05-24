@@ -1,15 +1,24 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormData } from '../types/form';
-import { InputField } from '../../fields/InputField';
+import { InputField } from '../fields/InputField';
 import { SelectField } from '../fields/SelectField';
 import { CheckboxGroup } from '../fields/CheckboxGroup';
+import { temperamentLabels } from '../constants/formLabels';
 
 const BehaviorHealthSection: React.FC = () => {
   const { 
     register, 
     formState: { errors }
   } = useFormContext<FormData>();
+  
+  const temperamentOptions = [
+    { value: '', label: 'Select temperament...' },
+    ...Object.entries(temperamentLabels).map(([value, label]) => ({
+      value,
+      label
+    }))
+  ];
   
   return (
     <div className="space-y-6">
@@ -19,14 +28,7 @@ const BehaviorHealthSection: React.FC = () => {
         register={register}
         rules={{ required: 'Please select a temperament' }}
         error={errors.temperament}
-        options={[
-          { value: '', label: 'Select temperament...' },
-          { value: 'calm', label: 'Calm' },
-          { value: 'friendly', label: 'Friendly' },
-          { value: 'energetic', label: 'Energetic' },
-          { value: 'anxious', label: 'Anxious' },
-          { value: 'aggressive', label: 'Aggressive' }
-        ]}
+        options={temperamentOptions}
       />
       
       <div className="space-y-2">

@@ -8,9 +8,10 @@ import { usePet } from '../../contexts/PetContext';
 
 interface VetHistoryProps {
   onSessionSelect?: (sessionId: string) => void;
+  historyRefreshTrigger: number;
 }
 
-const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect }) => {
+const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect, historyRefreshTrigger }) => {
   const [historyItems, setHistoryItems] = useState<VetHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -74,7 +75,7 @@ const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect }) => {
 
   useEffect(() => {
     fetchChatHistory(showAll);
-  }, [user, currentPet, showAll]);
+  }, [user, currentPet, showAll, historyRefreshTrigger]);
 
   const handleViewAll = () => {
     setShowAll(true);

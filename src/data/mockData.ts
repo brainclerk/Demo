@@ -12,35 +12,42 @@ export const mockUser: User = {
 
 // export const mockPet: Pet = {
 //   id: '1',
-//   name: 'Ruby',
-//   species: 'Dog',
+//   user_id: 'user1',
+//   pet_name: 'Ruby',
 //   breed: 'Samoyed',
-//   age: 3,
-//   weight: 20,
-//   avatar: 'https://images.pexels.com/photos/2853422/pexels-photo-2853422.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-//   healthInfo: {
-//     allergies: ['Chicken', 'Wheat'],
-//     medications: ['Apoquel 16mg daily'],
-//     conditions: ['Seasonal allergies', 'Mild hip dysplasia'],
-//     vaccinations: {
-//       lastUpdated: new Date(2024, 0, 15),
-//       nextDue: new Date(2024, 6, 15),
-//       records: ['DHPP', 'Rabies', 'Bordetella']
-//     },
-//     diet: {
-//       current: 'Hill\'s Science Diet Sensitive Stomach',
-//       feedingSchedule: 'Twice daily',
-//       treats: ['Carrots', 'Apple slices', 'Blueberries'],
-//       restrictions: ['No chicken products', 'Limited wheat']
-//     },
-//     exercise: {
-//       dailyRoutine: '2 walks per day, 30 minutes each',
-//       activities: ['Fetch', 'Agility training', 'Swimming'],
-//       restrictions: 'Limited high-impact activities due to hip dysplasia'
-//     },
-//     lastCheckup: new Date(2024, 1, 20),
-//     nextAppointment: new Date(2024, 7, 20)
-//   }
+//   breed_type: 'purebred',
+//   sex: 'female',
+//   birth_date: '2021-01-15T00:00:00Z',
+//   weight: '20',
+//   size_category: 'medium',
+//   medical_conditions: ['Seasonal allergies', 'Mild hip dysplasia'],
+//   other_condition: '',
+//   current_medications: 'Apoquel 16mg daily',
+//   surgeries_or_procedures: '',
+//   surgery_date: null,
+//   vet_records: null,
+//   diet_types: ['Kibble'],
+//   other_diet_type: '',
+//   main_brands: 'Hill\'s Science Diet Sensitive Stomach',
+//   takes_supplements: true,
+//   supplement_details: 'Daily fish oil supplement',
+//   food_allergies: 'Chicken, Wheat',
+//   activity_level: 'moderate',
+//   activity_minutes: 60,
+//   uses_tracking_device: false,
+//   tracking_device_details: '',
+//   alone_in_day: false,
+//   hours_alone: 0,
+//   temperament: 'friendly',
+//   recent_behaviors: ['Fetch', 'Agility training', 'Swimming'],
+//   current_symptoms: [],
+//   major_health_events: '',
+//   top_concern: 'Hip dysplasia management',
+//   improvement_goals: 'Maintain healthy weight and joint health',
+//   care_confidence: 4,
+//   interests: ['Training', 'Exercise', 'Nutrition'],
+//   created_at: '2024-01-01T00:00:00Z',
+//   updated_at: '2024-01-01T00:00:00Z'
 // };
 
 export const mockMessages: Message[] = [

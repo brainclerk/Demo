@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar user={user as User} />
+      <Sidebar user={user as User} pet={currentPet} />
       <main className="flex-1 h-screen overflow-y-auto">
         <ChatInterface pet={currentPet} />
       </main>

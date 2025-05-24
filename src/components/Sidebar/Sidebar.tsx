@@ -1,23 +1,22 @@
 import React from 'react';
-import { User } from '../../types';
-import {
-  Infinity, Zap, Search, Sparkles, PawPrint, Stethoscope,
-  FlaskConical, Database, Star
-} from 'lucide-react';
+import { User, Pet } from '../../types';
 import UserProfile from './UserProfile';
 import PremiumSearch from './PremiumSearch';
 import Shortcuts from './Shortcuts';
 import VirtualVet from './VirtualVet';
 import PinnedFeatures from './PinnedFeatures';
+import PetProfile from './PetProfile';
 
 interface SidebarProps {
   user: User;
+  pet: Pet;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, pet }) => {
   return (
     <aside className="w-[380px] border-r border-gray-200 bg-white hidden md:flex flex-col h-screen overflow-y-auto">
       <UserProfile user={user} />
+      <PetProfile pet={pet} />
       {/* 
       <div className="border-t border-gray-200 p-4">
         <div className="flex items-center mb-4">

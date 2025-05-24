@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PetProvider } from './contexts/PetContext';
 import Login from './components/auth/Login';
@@ -10,12 +11,19 @@ import { authService } from './services/auth.service';
 const AppContent: React.FC = () => {
   const { user, isLoading, logout, updateUser } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
+  const navigate = useNavigate();
 
   const handleOnboardingComplete = async () => {
+    console.log('Onboarding complete');
     if (user) {
       try {
-        await authService.updateOnboardingStatus(user.id, true);
-        updateUser({ onboardingCompleted: true });
+        // Only update onboarding status if it's a new profile (not an edit)
+        if (!user.onboardingCompleted) {
+          await authService.updateOnboardingStatus(user.id, true);
+          updateUser({ onboardingCompleted: true });
+        }
+        // Navigate to dashboard after completion
+        navigate('/');
       } catch (error) {
         console.error('Error updating onboarding status:', error);
       }
@@ -44,11 +52,24 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (!user.onboardingCompleted) {
-    return <Onboarding user={user} onComplete={handleOnboardingComplete} />;
-  }
-
-  return <Dashboard />;
+  return (
+    <Routes>
+      <Route 
+        path="/onboarding" 
+        element={<Onboarding user={user} onComplete={handleOnboardingComplete} />}
+      />
+      <Route 
+        path="/" 
+        element={
+          !user.onboardingCompleted ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <Dashboard />
+          )
+        } 
+      />
+    </Routes>
+  );
 };
 
 const App: React.FC = () => {
