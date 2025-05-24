@@ -57,7 +57,7 @@ export interface Message {
 
 export interface VetHistoryItem {
   id: string;
-  type: 'allergies' | 'appointment' | 'question';
+  type: AgentType | 'allergies' | 'appointment';
   title: string;
   timestamp: Date;
 }
