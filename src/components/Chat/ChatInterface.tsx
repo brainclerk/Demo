@@ -25,6 +25,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
   });
 
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [currentAgent, setCurrentAgent] = useState<AgentType>('general');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,15 +50,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
 
   useEffect(() => {
     const loadChatSession = async () => {
-      if (!currentSessionId || !userId) return;
-
+      if (!selectedSessionId || !userId) return;
+      setCurrentSessionId(selectedSessionId);
       setIsLoading(true);
       try {
         // Fetch messages for the selected session
         const { data: messages, error } = await supabase
           .from('messages')
           .select('*')
-          .eq('session_id', currentSessionId)
+          .eq('session_id', selectedSessionId)
           .order('timestamp', { ascending: true });
 
         if (error) {
@@ -98,7 +99,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
     };
 
     loadChatSession();
-  }, [currentSessionId, userId]);
+  }, [selectedSessionId, userId]);
 
   const createChatSession = async () => {
     if (!userId) return null;
@@ -209,9 +210,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
         timestamp: new Date(),
         agentType
       };
-
-      // Save system message to database
-      await saveMessageToDatabase(systemMessage, sessionId);
 
       try {
         const response = await getChatCompletion({
@@ -468,7 +466,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       analysis: [],
       creative: []
     });
-    setCurrentSessionId(sessionId);
+    setSelectedSessionId(sessionId);
   };
 
   return (
@@ -489,7 +487,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ pet }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto mb-4 max-h-[700px]" ref={messagesContainerRef}>
-        <ChatMessages messages={messagesByAgent[currentAgent]} isLoading={isLoading} />
+        <ChatMessages messages={messagesByAgent[currentAgent]} agentType={currentAgent} isLoading={isLoading} />
 
         {messagesByAgent[currentAgent].length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center h-48">

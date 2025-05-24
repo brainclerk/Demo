@@ -18,7 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
   return (
     <aside className="w-[380px] border-r border-gray-200 bg-white hidden md:flex flex-col h-screen overflow-y-auto">
       <UserProfile user={user} />
-
+      {/* 
       <div className="border-t border-gray-200 p-4">
         <div className="flex items-center mb-4">
           <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -31,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <PremiumSearch />
       <Shortcuts />

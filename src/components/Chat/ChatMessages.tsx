@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Message } from '../../types';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -6,10 +6,12 @@ import { File } from 'lucide-react';
 
 interface ChatMessagesProps {
   messages: Message[];
+  agentType: string;
   isLoading: boolean;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, agentType, isLoading }) => {
+
   if (messages.length === 0 && !isLoading) return null;
 
   return (

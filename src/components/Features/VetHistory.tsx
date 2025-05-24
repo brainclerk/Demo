@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { VetHistoryItem } from '../../types';
 import { formatDistanceToNow } from 'date-fns';
-import { CalendarClock, PawPrint, MessageSquare } from 'lucide-react';
+import { CalendarClock, PawPrint, MessageSquare, Bone, ClipboardList, Lightbulb, Zap } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePet } from '../../contexts/PetContext';
@@ -24,7 +24,16 @@ const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect }) => {
       setIsLoading(true);
       let query = supabase
         .from('chat_sessions')
-        .select('id, created_at, title')
+        .select(`
+          id, 
+          created_at, 
+          title,
+          messages!inner (
+            content,
+            agent_type,
+            timestamp
+          )
+        `)
         .eq('user_id', user.id)
         .eq('pet_id', currentPet.id)
         .order('created_at', { ascending: false });
@@ -41,12 +50,19 @@ const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect }) => {
         return;
       }
 
-      const history: VetHistoryItem[] = sessions.map(session => ({
-        id: session.id,
-        type: 'question',
-        title: session.title || 'Chat Session',
-        timestamp: new Date(session.created_at)
-      }));
+      const history: VetHistoryItem[] = sessions.map(session => {
+        // Get the first message by timestamp
+        const firstMessage = session.messages.sort((a: any, b: any) => 
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        )[0];
+
+        return {
+          id: session.id,
+          type: firstMessage?.agent_type || 'general',
+          title: session.title || 'Chat Session',
+          timestamp: new Date(session.created_at)
+        };
+      });
 
       setHistoryItems(history);
     } catch (error) {
@@ -76,10 +92,16 @@ const VetHistory: React.FC<VetHistoryProps> = ({ onSessionSelect }) => {
         return <PawPrint className="w-4 h-4 text-blue-500" />;
       case 'appointment':
         return <CalendarClock className="w-4 h-4 text-blue-500" />;
-      case 'question':
-        return <MessageSquare className="w-4 h-4 text-blue-500" />;
+      case 'nutrition':
+        return <Bone className="w-4 h-4 text-green-500" />;
+      case 'assessment':
+        return <MessageSquare className="w-4 h-4 text-amber-400" />;
+      case 'analysis':
+        return <ClipboardList className="w-4 h-4 text-red-400" />;
+      case 'creative':
+        return <Lightbulb className="w-4 h-4 text-purple-500" />;
       default:
-        return <MessageSquare className="w-4 h-4 text-blue-500" />;
+        return <Zap className="w-4 h-4 text-blue-500" />;
     }
   };
 
