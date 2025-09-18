@@ -49,7 +49,8 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
             const completion = await openai.chat.completions.create({
                 model: "gpt-5-mini",
                 messages: messages as any, // Type assertion needed due to OpenAI's type definitions
-                max_completion_tokens: options.max_tokens || 1000
+                max_completion_tokens: options.max_tokens || 1000,
+                reasoning: { effort: "low" }
             });
 
             return completion.choices[0].message;
