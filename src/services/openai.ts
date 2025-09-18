@@ -7,8 +7,8 @@ const openai = new OpenAI({
 });
 
 export interface ChatCompletionOptions {
-    messages: Message[];
-    max_tokens?: number;
+    messages: Message[];                  // { role: 'system'|'user'|'assistant'; content: string; images?: string[] }
+    max_tokens?: number;                  // visible output tokens
     retryCount?: number;
     reasoningEffort?: "low" | "medium" | "high";
 }
@@ -20,22 +20,27 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
     const maxOutputTokens = options.max_tokens ?? 1000;
     const reasoningEffort = options.reasoningEffort ?? "low";
 
+    // Map to Responses API input, using role-aware part types
     const input = options.messages.map((msg) => {
-        if (msg.images && msg.images.length > 0) {
-            return {
-                role: msg.role,
-                content: [
-                    { type: "input_text" as const, text: msg.content },
-                    ...msg.images.map((image) => ({
-                        type: "input_image" as const,
-                        image_url: `data:image/jpeg;base64,${image}`,
-                    })),
-                ],
-            };
-        }
+        const isAssistant = msg.role === "assistant";
+
+        // Build the text part with the correct type by role
+        const textPart = isAssistant
+            ? ({ type: "output_text", text: msg.content } as const)
+            : ({ type: "input_text", text: msg.content } as const);
+
+        // Only user/system/dev messages can include input images
+        const imageParts =
+            !isAssistant && msg.images?.length
+                ? msg.images.map((image) => ({
+                    type: "input_image" as const,
+                    image_url: `data:image/jpeg;base64,${image}`,
+                }))
+                : [];
+
         return {
             role: msg.role,
-            content: [{ type: "input_text" as const, text: msg.content }],
+            content: [textPart, ...imageParts],
         };
     });
 
@@ -46,18 +51,17 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
             const resp = await openai.responses.create({
                 model: "gpt-5-mini",
                 input,
-                max_output_tokens: maxOutputTokens,
-                reasoning: { effort: reasoningEffort },
+                max_output_tokens: maxOutputTokens,       // visible text cap only
+                reasoning: { effort: reasoningEffort },    // control hidden reasoning
             });
 
+            // Prefer SDK convenience; fallback to manual parse
             const text =
                 (resp as any).output_text ??
                 (resp.output
                     ?.map((block: any) =>
                         (block.content ?? [])
-                            .map((part: any) =>
-                                part?.type === "output_text" ? part.text : ""
-                            )
+                            .map((part: any) => (part?.type === "output_text" ? part.text : ""))
                             .join("")
                     )
                     .join("\n")) ??
