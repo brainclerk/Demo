@@ -1,37 +1,36 @@
 import OpenAI from "openai";
 import { Message } from "../types";
 
-// Initialize OpenAI client (unchanged)
 const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true, // In production, proxy through a backend
+    dangerouslyAllowBrowser: true,
 });
 
 export interface ChatCompletionOptions {
-    messages: Message[];          // { role: 'system'|'user'|'assistant'; content: string; images?: string[] }
+    messages: Message[];
     temperature?: number;
-    max_tokens?: number;          // visible output tokens (mapped to max_output_tokens)
+    max_tokens?: number;
     retryCount?: number;
-    reasoningEffort?: "low" | "medium" | "high"; // <-- new, optional
+    reasoningEffort?: "low" | "medium" | "high";
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const getChatCompletion = async (options: ChatCompletionOptions) => {
     const maxRetries = options.retryCount ?? 3;
-    const maxOutputTokens = options.max_tokens ?? 1000;      // visible text budget
+    const maxOutputTokens = options.max_tokens ?? 1000;
     const reasoningEffort = options.reasoningEffort ?? "low";
     const temperature = options.temperature ?? 0.7;
 
-    // Map your messages to Responses API "input" format
+    // ✅ Convert messages to Responses API input format
     const input = options.messages.map((msg) => {
         if (msg.images && msg.images.length > 0) {
             return {
                 role: msg.role,
                 content: [
-                    { type: "text", text: msg.content },
+                    { type: "input_text" as const, text: msg.content },
                     ...msg.images.map((image) => ({
-                        type: "image_url" as const,
+                        type: "input_image" as const,
                         image_url: `data:image/jpeg;base64,${image}`,
                     })),
                 ],
@@ -39,7 +38,7 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
         }
         return {
             role: msg.role,
-            content: [{ type: "text", text: msg.content }],
+            content: [{ type: "input_text" as const, text: msg.content }],
         };
     });
 
@@ -51,17 +50,18 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
                 model: "gpt-5-mini",
                 input,
                 temperature,
-                max_output_tokens: maxOutputTokens,     // caps visible text only
-                reasoning: { effort: reasoningEffort }, // valid on Responses API
+                max_output_tokens: maxOutputTokens,
+                reasoning: { effort: reasoningEffort },
             });
 
-            // Prefer SDK convenience; fall back to manual concat if needed
             const text =
                 (resp as any).output_text ??
                 (resp.output
                     ?.map((block: any) =>
                         (block.content ?? [])
-                            .map((part: any) => (typeof part?.text === "string" ? part.text : ""))
+                            .map((part: any) =>
+                                part?.type === "output_text" ? part.text : ""
+                            )
                             .join("")
                     )
                     .join("\n")) ??
@@ -72,7 +72,7 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
             if (error?.status === 429) {
                 retryCount++;
                 if (retryCount < maxRetries) {
-                    const waitTime = Math.pow(2, retryCount) * 1000; // backoff
+                    const waitTime = Math.pow(2, retryCount) * 1000;
                     await delay(waitTime);
                     continue;
                 }
@@ -87,6 +87,5 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
         }
     }
 
-    // Should be unreachable due to throw
     return { role: "assistant" as const, content: "" };
 };
