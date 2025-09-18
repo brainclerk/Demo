@@ -50,7 +50,7 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
                 model: "gpt-5-mini",
                 messages: messages as any, // Type assertion needed due to OpenAI's type definitions
                 temperature: options.temperature || 0.42,
-                max_tokens: options.max_tokens || 1000
+                max_completion_tokens: options.max_tokens || 1000
             });
 
             return completion.choices[0].message;
