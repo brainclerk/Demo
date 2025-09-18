@@ -8,7 +8,6 @@ const openai = new OpenAI({
 
 export interface ChatCompletionOptions {
     messages: Message[];
-    temperature?: number;
     max_tokens?: number;
     retryCount?: number;
     reasoningEffort?: "low" | "medium" | "high";
@@ -20,9 +19,7 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
     const maxRetries = options.retryCount ?? 3;
     const maxOutputTokens = options.max_tokens ?? 1000;
     const reasoningEffort = options.reasoningEffort ?? "low";
-    const temperature = options.temperature ?? 0.7;
 
-    // ✅ Convert messages to Responses API input format
     const input = options.messages.map((msg) => {
         if (msg.images && msg.images.length > 0) {
             return {
@@ -49,7 +46,6 @@ export const getChatCompletion = async (options: ChatCompletionOptions) => {
             const resp = await openai.responses.create({
                 model: "gpt-5-mini",
                 input,
-                temperature,
                 max_output_tokens: maxOutputTokens,
                 reasoning: { effort: reasoningEffort },
             });
